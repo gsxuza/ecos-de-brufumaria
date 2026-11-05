@@ -1,0 +1,547 @@
+
+==================== 01_schema.sql ====================
+  » schema "rpg" does not exist, skipping
+ok
+
+==================== 02_funcoes.sql ====================
+ok
+
+==================== 03_triggers.sql ====================
+ok
+
+==================== 04_procedures.sql ====================
+ok
+
+==================== 05_views.sql ====================
+ok
+
+==================== 06_dados.sql ====================
+ok
+
+==================== 07_seguranca.sql ====================
+ok
+
+==================== 08_demo.sql ====================
+┌─────────┬─────────┐
+│ (index) │ setseed │
+├─────────┼─────────┤
+│ 0       │ ''      │
+└─────────┴─────────┘
+
+--- 1. Os dados: notação de RPG e distribuição de 2d6 (curva em sino) ---
+┌─────────┬─────┬───────┬─────┬─────────┐
+│ (index) │ d20 │ 3d6+2 │ d32 │ 2d64-10 │
+├─────────┼─────┼───────┼─────┼─────────┤
+│ 0       │ 15  │ 12    │ 4   │ 36      │
+└─────────┴─────┴───────┴─────┴─────────┘
+┌─────────┬─────┬───────┬───────────────────┐
+│ (index) │ 2d6 │ vezes │ histograma        │
+├─────────┼─────┼───────┼───────────────────┤
+│ 0       │ 2   │ 157   │ '██'              │
+│ 1       │ 3   │ 365   │ '██████'          │
+│ 2       │ 4   │ 506   │ '████████'        │
+│ 3       │ 5   │ 643   │ '██████████'      │
+│ 4       │ 6   │ 837   │ '█████████████'   │
+│ 5       │ 7   │ 948   │ '███████████████' │
+│ 6       │ 8   │ 869   │ '██████████████'  │
+│ 7       │ 9   │ 657   │ '██████████'      │
+│ 8       │ 10  │ 492   │ '████████'        │
+│ 9       │ 11  │ 356   │ '█████'           │
+│ 10      │ 12  │ 170   │ '██'              │
+└─────────┴─────┴───────┴───────────────────┘
+
+--- 2. Criação de personagens (trigger gera atributos, HP/MP e kit inicial) ---
+  » Personagem Aria criado (id 1).
+  » Personagem Bento criado (id 2).
+  » Personagem Cael criado (id 3).
+  » Personagem Dora criado (id 4).
+┌─────────┬──────┐
+│ (index) │ p_id │
+├─────────┼──────┤
+│ 0       │ 1    │
+└─────────┴──────┘
+┌─────────┬──────┐
+│ (index) │ p_id │
+├─────────┼──────┤
+│ 0       │ 2    │
+└─────────┴──────┘
+┌─────────┬──────┐
+│ (index) │ p_id │
+├─────────┼──────┤
+│ 0       │ 3    │
+└─────────┴──────┘
+┌─────────┬──────┐
+│ (index) │ p_id │
+├─────────┼──────┤
+│ 0       │ 4    │
+└─────────┴──────┘
+┌─────────┬─────────┬─────────────┬───────┬─────────┬─────────┬────────┬────────┬────────────┬───────┬───────────┬───────┬──────┬─────────────────────┐
+│ (index) │ nome    │ classe      │ nivel │ hp      │ mp      │ ataque │ defesa │ vitalidade │ magia │ agilidade │ sorte │ ouro │ regiao              │
+├─────────┼─────────┼─────────────┼───────┼─────────┼─────────┼────────┼────────┼────────────┼───────┼───────────┼───────┼──────┼─────────────────────┤
+│ 0       │ 'Aria'  │ 'Guerreiro' │ 1     │ '36/36' │ '3/3'   │ 11     │ 8      │ 8          │ 1     │ 4         │ 3     │ 50   │ 'Vila de Brumafria' │
+│ 1       │ 'Bento' │ 'Mago'      │ 1     │ '27/27' │ '31/31' │ 3      │ 4      │ 5          │ 15    │ 6         │ 4     │ 50   │ 'Vila de Brumafria' │
+│ 2       │ 'Cael'  │ 'Ladino'    │ 1     │ '30/30' │ '5/5'   │ 5      │ 6      │ 6          │ 2     │ 11        │ 12    │ 50   │ 'Vila de Brumafria' │
+│ 3       │ 'Dora'  │ 'Clérigo'   │ 1     │ '33/33' │ '19/19' │ 7      │ 7      │ 7          │ 9     │ 4         │ 5     │ 50   │ 'Vila de Brumafria' │
+└─────────┴─────────┴─────────────┴───────┴─────────┴─────────┴────────┴────────┴────────────┴───────┴───────────┴───────┴──────┴─────────────────────┘
+
+--- 3. Regras protegidas pelo banco ---
+  » BLOQUEADO: A classe "Fera" pertence a monstros e não pode ser escolhida.
+  » BLOQUEADO: "Poção Menor" não é equipável.
+  » BLOQUEADO: O caminho para "Pântano de Vidro" está fechado para Aria.
+  » BLOQUEADO: O caminho para "Santuário do Sino Partido" está fechado para Aria.
+  » BLOQUEADO: Nada se move por aqui.
+
+--- 4. Loja, missões e viagem ---
+  » Comprou Poção Menor x2 por 20 de ouro.
+  » Comprou Amuleto do Trevo x1 por 45 de ouro.
+  » Missão aceita: Ratos no Celeiro — O moleiro pede que você elimine 3 ratos-de-musgo no bosque.
+  » Chegou a Bosque dos Sussurros. Agora é dia (10h).
+  » Chegou a Bosque dos Sussurros. Agora é dia (12h).
+  » Chegou a Bosque dos Sussurros. Agora é dia (14h).
+  » Chegou a Bosque dos Sussurros. Agora é dia (16h).
+
+--- 5. Batalha manual, turno a turno ---
+  » Batalha 1 iniciada: Aria vs Rato-de-Musgo.
+  » Turno 1 | Aria HP 36/36 MP 0/3 | Rato-de-Musgo HP 0/21 | VITORIA
+┌─────────┬───────────┐
+│ (index) │ p_batalha │
+├─────────┼───────────┤
+│ 0       │ 1         │
+└─────────┴───────────┘
+┌─────────┬───────┬──────────────┬───────────────────────────────────────────────────────────────────┐
+│ (index) │ turno │ ator         │ mensagem                                                          │
+├─────────┼───────┼──────────────┼───────────────────────────────────────────────────────────────────┤
+│ 0       │ 0     │ 'sistema'    │ 'Aria encontra Rato-de-Musgo (nível 1, 21 HP) — roído e faminto.' │
+│ 1       │ 0     │ 'sistema'    │ 'Emboscada! O monstro age primeiro.'                              │
+│ 2       │ 0     │ 'monstro'    │ 'Rato-de-Musgo ataca: d20=7, errou — 0 de dano.'                  │
+│ 3       │ 1     │ 'personagem' │ 'Aria usa Golpe Brutal (neutro): d20=20, CRÍTICO — 24 de dano.'   │
+│ 4       │ 1     │ 'sistema'    │ 'Vitória! +25 XP, +4 ouro.'                                       │
+│ 5       │ 1     │ 'sistema'    │ 'Saque: Erva Amarga x1'                                           │
+└─────────┴───────┴──────────────┴───────────────────────────────────────────────────────────────────┘
+
+--- 6. Turnos pré-programados: 8 batalhas automáticas por herói ---
+  » Batalha 2 iniciada: Aria vs Rato-de-Musgo.
+  » Turno 1 | Aria HP 35/36 MP 0/3 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 2 terminou: VITORIA ===
+  » Batalha 3 iniciada: Aria vs Rato-de-Musgo.
+  » Turno 1 | Aria HP 24/36 MP 0/3 | Rato-de-Musgo HP 7/21 | EM_ANDAMENTO
+  » ▲ Aria subiu para o nível 2!
+  » ✔ Missão concluída: Ratos no Celeiro
+  » Turno 2 | Aria HP 44/44 MP 4/4 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 3 terminou: VITORIA ===
+  » Batalha 4 iniciada: Aria vs Rato-de-Musgo.
+  » Turno 1 | Aria HP 35/44 MP 1/4 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Aria HP 29/44 MP 1/4 | Rato-de-Musgo HP 2/21 | EM_ANDAMENTO
+  » Turno 3 | Aria HP 29/44 MP 1/4 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 4 terminou: VITORIA ===
+  » Batalha 5 iniciada: Aria vs Fogo-Fátuo.
+  » Turno 1 | Aria HP 29/44 MP 1/4 | Fogo-Fátuo HP 26/26 | EM_ANDAMENTO
+  » Turno 2 | Aria HP 29/44 MP 1/4 | Fogo-Fátuo HP 14/26 | EM_ANDAMENTO
+  » Turno 3 | Aria HP 29/44 MP 1/4 | Fogo-Fátuo HP 0/26 | VITORIA
+  » === Batalha 5 terminou: VITORIA ===
+  » Batalha 6 iniciada: Aria vs Fogo-Fátuo.
+  » Turno 1 | Aria HP 17/44 MP 1/4 | Fogo-Fátuo HP 6/26 | EM_ANDAMENTO
+  » Turno 2 | Aria HP 36/44 MP 1/4 | Fogo-Fátuo HP 6/26 | EM_ANDAMENTO
+  » Turno 3 | Aria HP 36/44 MP 1/4 | Fogo-Fátuo HP 0/26 | VITORIA
+  » === Batalha 6 terminou: VITORIA ===
+  » Batalha 7 iniciada: Aria vs Lobo Cinzento.
+  » Turno 1 | Aria HP 22/44 MP 1/4 | Lobo Cinzento HP 26/26 | EM_ANDAMENTO
+  » Turno 2 | Aria HP 22/44 MP 1/4 | Lobo Cinzento HP 12/26 | EM_ANDAMENTO
+  » ▲ Aria subiu para o nível 3!
+  » Turno 3 | Aria HP 52/52 MP 5/5 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 7 terminou: VITORIA ===
+  » Batalha 8 iniciada: Aria vs Fogo-Fátuo.
+  » Turno 1 | Aria HP 46/52 MP 2/5 | Fogo-Fátuo HP 4/26 | EM_ANDAMENTO
+  » Turno 2 | Aria HP 46/52 MP 2/5 | Fogo-Fátuo HP 0/26 | VITORIA
+  » === Batalha 8 terminou: VITORIA ===
+  » Batalha 9 iniciada: Aria vs Rato-de-Musgo.
+  » Turno 1 | Aria HP 45/52 MP 2/5 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Aria HP 43/52 MP 2/5 | Rato-de-Musgo HP 6/21 | EM_ANDAMENTO
+  » Turno 3 | Aria HP 43/52 MP 2/5 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 9 terminou: VITORIA ===
+  » Batalha 10 iniciada: Bento vs Rato-de-Musgo.
+  » Turno 1 | Bento HP 27/27 MP 27/31 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 10 terminou: VITORIA ===
+  » Batalha 11 iniciada: Bento vs Rato-de-Musgo.
+  » Turno 1 | Bento HP 24/27 MP 23/31 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Bento HP 24/27 MP 19/31 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 11 terminou: VITORIA ===
+  » Batalha 12 iniciada: Bento vs Rato-de-Musgo.
+  » Turno 1 | Bento HP 24/27 MP 15/31 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 12 terminou: VITORIA ===
+  » Batalha 13 iniciada: Bento vs Fogo-Fátuo.
+  » ▲ Bento subiu para o nível 2!
+  » Turno 1 | Bento HP 32/32 MP 36/36 | Fogo-Fátuo HP 0/26 | VITORIA
+  » === Batalha 13 terminou: VITORIA ===
+  » Batalha 14 iniciada: Bento vs Lobo Cinzento.
+  » Turno 1 | Bento HP 32/32 MP 32/36 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 14 terminou: VITORIA ===
+  » Batalha 15 iniciada: Bento vs Lobo Cinzento.
+  » Turno 1 | Bento HP 32/32 MP 28/36 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 15 terminou: VITORIA ===
+  » Batalha 16 iniciada: Bento vs Lobo Cinzento.
+  » Turno 1 | Bento HP 32/32 MP 24/36 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 16 terminou: VITORIA ===
+  » Batalha 17 iniciada: Bento vs Rato-de-Musgo.
+  » Turno 1 | Bento HP 19/32 MP 20/36 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Bento HP 19/32 MP 16/36 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 3 | Bento HP 19/32 MP 12/36 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 4 | Bento HP 19/32 MP 8/36 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 17 terminou: VITORIA ===
+  » Batalha 18 iniciada: Cael vs Lobo Cinzento.
+  » Turno 1 | Cael HP 24/30 MP 2/5 | Lobo Cinzento HP 10/26 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 24/30 MP 2/5 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 18 terminou: VITORIA ===
+  » Batalha 19 iniciada: Cael vs Rato-de-Musgo.
+  » Turno 1 | Cael HP 22/30 MP 2/5 | Rato-de-Musgo HP 9/21 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 9/21 | EM_ANDAMENTO
+  » Turno 3 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 9/21 | EM_ANDAMENTO
+  » Turno 4 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 19 terminou: VITORIA ===
+  » Batalha 20 iniciada: Cael vs Rato-de-Musgo.
+  » Turno 1 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 6/21 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 20 terminou: VITORIA ===
+  » Batalha 21 iniciada: Cael vs Rato-de-Musgo.
+  » Turno 1 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 20/30 MP 2/5 | Rato-de-Musgo HP 4/21 | EM_ANDAMENTO
+  » ▲ Cael subiu para o nível 2!
+  » Turno 3 | Cael HP 35/35 MP 6/6 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 21 terminou: VITORIA ===
+  » Batalha 22 iniciada: Cael vs Rato-de-Musgo.
+  » Turno 1 | Cael HP 35/35 MP 3/6 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 22 terminou: VITORIA ===
+  » Batalha 23 iniciada: Cael vs Rato-de-Musgo.
+  » Turno 1 | Cael HP 35/35 MP 0/6 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 23 terminou: VITORIA ===
+  » Batalha 24 iniciada: Cael vs Rato-de-Musgo.
+  » Turno 1 | Cael HP 35/35 MP 0/6 | Rato-de-Musgo HP 5/21 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 35/35 MP 0/6 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 24 terminou: VITORIA ===
+  » Batalha 25 iniciada: Cael vs Lobo Cinzento.
+  » Turno 1 | Cael HP 35/35 MP 0/6 | Lobo Cinzento HP 8/26 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 35/35 MP 0/6 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 25 terminou: VITORIA ===
+  » Batalha 26 iniciada: Dora vs Lobo Cinzento.
+  » Turno 1 | Dora HP 33/33 MP 14/19 | Lobo Cinzento HP 13/26 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 33/33 MP 9/19 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 26 terminou: VITORIA ===
+  » Batalha 27 iniciada: Dora vs Rato-de-Musgo.
+  » Turno 1 | Dora HP 33/33 MP 4/19 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 27 terminou: VITORIA ===
+  » Batalha 28 iniciada: Dora vs Rato-de-Musgo.
+  » Turno 1 | Dora HP 24/33 MP 4/19 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 24/33 MP 4/19 | Rato-de-Musgo HP 9/21 | EM_ANDAMENTO
+  » Turno 3 | Dora HP 19/33 MP 4/19 | Rato-de-Musgo HP 2/21 | EM_ANDAMENTO
+  » Turno 4 | Dora HP 19/33 MP 4/19 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 28 terminou: VITORIA ===
+  » Batalha 29 iniciada: Dora vs Lobo Cinzento.
+  » Turno 1 | Dora HP 9/33 MP 4/19 | Lobo Cinzento HP 15/26 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 19/33 MP 0/19 | Lobo Cinzento HP 15/26 | EM_ANDAMENTO
+  » Turno 3 | Dora HP 14/33 MP 0/19 | Lobo Cinzento HP 15/26 | EM_ANDAMENTO
+  » Turno 4 | Dora HP 6/33 MP 0/19 | Lobo Cinzento HP 8/26 | EM_ANDAMENTO
+  » Turno 5 | Dora HP 25/33 MP 0/19 | Lobo Cinzento HP 8/26 | EM_ANDAMENTO
+  » ▲ Dora subiu para o nível 2!
+  » Turno 6 | Dora HP 38/38 MP 22/22 | Lobo Cinzento HP 0/26 | VITORIA
+  » === Batalha 29 terminou: VITORIA ===
+  » Batalha 30 iniciada: Dora vs Rato-de-Musgo.
+  » Turno 1 | Dora HP 37/38 MP 17/22 | Rato-de-Musgo HP 21/21 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 37/38 MP 12/22 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 30 terminou: VITORIA ===
+  » Batalha 31 iniciada: Dora vs Cervo Pálido.
+  » Turno 1 | Dora HP 37/38 MP 7/22 | Cervo Pálido HP 8/34 | FUGA
+  » === Batalha 31 terminou: FUGA ===
+  » Batalha 32 iniciada: Dora vs Fogo-Fátuo.
+  » Turno 1 | Dora HP 27/38 MP 2/22 | Fogo-Fátuo HP 10/26 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 27/38 MP 2/22 | Fogo-Fátuo HP 0/26 | VITORIA
+  » === Batalha 32 terminou: VITORIA ===
+  » Batalha 33 iniciada: Dora vs Rato-de-Musgo.
+  » Turno 1 | Dora HP 27/38 MP 2/22 | Rato-de-Musgo HP 6/21 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 27/38 MP 2/22 | Rato-de-Musgo HP 0/21 | VITORIA
+  » === Batalha 33 terminou: VITORIA ===
+┌─────────┬─────────┬─────────┬────────┬─────────────┬───────┬─────┬──────────┬──────────┬────────┬──────────────┬────────────┬───────────────────┐
+│ (index) │ posicao │ nome    │ titulo │ classe      │ nivel │ xp  │ vitorias │ derrotas │ chefes │ taxa_vitoria │ conquistas │ posicao_na_classe │
+├─────────┼─────────┼─────────┼────────┼─────────────┼───────┼─────┼──────────┼──────────┼────────┼──────────────┼────────────┼───────────────────┤
+│ 0       │ 1       │ 'Aria'  │ ''     │ 'Guerreiro' │ 3     │ 371 │ 9        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+│ 1       │ 2       │ 'Bento' │ ''     │ 'Mago'      │ 2     │ 279 │ 8        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+│ 2       │ 3       │ 'Dora'  │ ''     │ 'Clérigo'   │ 2     │ 239 │ 7        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+│ 3       │ 4       │ 'Cael'  │ ''     │ 'Ladino'    │ 2     │ 224 │ 8        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+└─────────┴─────────┴─────────┴────────┴─────────────┴───────┴─────┴──────────┴──────────┴────────┴──────────────┴────────────┴───────────────────┘
+┌─────────┬────────────┬────────────────────┬─────────┬───────────┬─────────────┬────┬──────┬────────────┐
+│ (index) │ personagem │ missao             │ tipo    │ progresso │ status      │ xp │ ouro │ observacao │
+├─────────┼────────────┼────────────────────┼─────────┼───────────┼─────────────┼────┼──────┼────────────┤
+│ 0       │ 'Aria'     │ 'Ratos no Celeiro' │ 'cacar' │ '3/3'     │ 'concluida' │ 60 │ 20   │ ''         │
+└─────────┴────────────┴────────────────────┴─────────┴───────────┴─────────────┴────┴──────┴────────────┘
+
+--- 7. Dia e noite: o Cervo Pálido só aparece à noite ---
+  » BLOQUEADO: "Cervo Pálido" não está à vista em Bosque dos Sussurros durante o(a) dia.
+  » O tempo passa... dia 3, 13h (dia).
+  » O tempo passa... dia 3, 14h (dia).
+  » O tempo passa... dia 3, 15h (dia).
+  » O tempo passa... dia 3, 16h (dia).
+  » O tempo passa... dia 3, 17h (dia).
+  » O tempo passa... dia 3, 18h (noite).
+  » Batalha 34 iniciada: Cael vs Cervo Pálido.
+  » Turno 1 | Cael HP 35/35 MP 0/6 | Cervo Pálido HP 34/34 | EM_ANDAMENTO
+  » Turno 2 | Cael HP 30/35 MP 0/6 | Cervo Pálido HP 17/34 | EM_ANDAMENTO
+  » Turno 3 | Cael HP 30/35 MP 0/6 | Cervo Pálido HP 5/34 | FUGA
+  » === Batalha 34 terminou: FUGA ===
+┌─────────┬─────┬───────┬─────────┐
+│ (index) │ dia │ hora  │ periodo │
+├─────────┼─────┼───────┼─────────┤
+│ 0       │ 3   │ '12h' │ 'dia'   │
+└─────────┴─────┴───────┴─────────┘
+┌─────────┬───────┬──────────────┬─────────────────────────────────────────────────────────────────────────────────────┐
+│ (index) │ turno │ ator         │ mensagem                                                                            │
+├─────────┼───────┼──────────────┼─────────────────────────────────────────────────────────────────────────────────────┤
+│ 0       │ 0     │ 'sistema'    │ 'Cael encontra Cervo Pálido (nível 3, 34 HP) — algo brilha preso aos seus chifres.' │
+│ 1       │ 1     │ 'personagem' │ 'Cael ataca Cervo Pálido: d20=4, errou — 0 de dano.'                                │
+│ 2       │ 1     │ 'monstro'    │ 'Cervo Pálido ataca: d20=4, errou — 0 de dano.'                                     │
+│ 3       │ 2     │ 'personagem' │ 'Cael ataca Cervo Pálido: d20=13, acerto — 17 de dano.'                             │
+│ 4       │ 2     │ 'monstro'    │ 'Cervo Pálido ataca: d20=17, acerto — 5 de dano.'                                   │
+│ 5       │ 3     │ 'personagem' │ 'Cael ataca Cervo Pálido: d20=10, acerto — 12 de dano.'                             │
+│ 6       │ 3     │ 'monstro'    │ 'Cervo Pálido foge para as sombras! Nada foi ganho.'                                │
+└─────────┴───────┴──────────────┴─────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────┬─────────────────────┬───────┬───────────────┬───────────┬─────┬────────────────────────────────┬────────────────────────────────────────────────┐
+│ (index) │ nome                │ nivel │ comportamento │ fraqueza  │ hp  │ onde_encontrar                 │ saque_conhecido                                │
+├─────────┼─────────────────────┼───────┼───────────────┼───────────┼─────┼────────────────────────────────┼────────────────────────────────────────────────┤
+│ 0       │ 'Rato-de-Musgo'     │ 1     │ 'agressivo'   │ 'fogo'    │ 21  │ 'Bosque dos Sussurros'         │ 'Erva Amarga 40.00%'                           │
+│ 1       │ 'Fogo-Fátuo'        │ 2     │ 'conjurador'  │ 'gelo'    │ 26  │ 'Bosque dos Sussurros (noite)' │ 'Brasa Viva 50.00%, Éter 20.00%'               │
+│ 2       │ 'Lobo Cinzento'     │ 2     │ 'agressivo'   │ 'fogo'    │ 26  │ 'Bosque dos Sussurros'         │ 'Couro de Lobo 60.00%'                         │
+│ 3       │ 'Cervo Pálido'      │ 3     │ 'covarde'     │ 'sombra'  │ 34  │ 'Bosque dos Sussurros (noite)' │ 'Chifre Pálido 50.00%'                         │
+│ 4       │ 'Esqueleto Mineiro' │ 3     │ 'defensivo'   │ 'sagrado' │ 37  │ 'Minas de Ferrugem'            │ 'Minério de Ferro 50.00%, Poção Menor 20.00%'  │
+│ 5       │ 'Golem de Ferrugem' │ 4     │ 'defensivo'   │ 'raio'    │ 39  │ 'Minas de Ferrugem'            │ 'Minério de Ferro 80.00%, Espada Rúnica 5.00%' │
+│ 6       │ 'Capataz Sem Rosto' │ 5     │ 'berserker'   │ 'sagrado' │ 118 │ 'Minas de Ferrugem'            │ 'Poção Maior 50.00%'                           │
+│ 7       │ 'Sapo Vítreo'       │ 5     │ 'agressivo'   │ 'raio'    │ 47  │ 'Pântano de Vidro'             │ 'Vidro Pantanoso 50.00%, Éter 15.00%'          │
+│ 8       │ 'Afogado'           │ 6     │ 'berserker'   │ 'fogo'    │ 58  │ 'Pântano de Vidro (noite)'     │ 'Poção Maior 20.00%, Cajado de Cristal 5.00%'  │
+│ 9       │ 'Bruxa do Junco'    │ 7     │ 'conjurador'  │ 'sagrado' │ 186 │ 'Pântano de Vidro (noite)'     │ 'Capa de Junco 40.00%'                         │
+│ 10      │ 'Eco do Sino'       │ 7     │ 'conjurador'  │ 'sombra'  │ 57  │ null                           │ 'Éter 40.00%'                                  │
+│ 11      │ 'O Sineiro'         │ 8     │ 'berserker'   │ 'sagrado' │ 208 │ null                           │ 'Sino Restaurado 100.00%'                      │
+└─────────┴─────────────────────┴───────┴───────────────┴───────────┴─────┴────────────────────────────────┴────────────────────────────────────────────────┘
+
+--- 8. Modo mestre: experiência concedida dispara level-up em cascata (trigger) ---
+  » ▲ Dora subiu para o nível 8!
+┌─────────┬────────┬───────┬─────────┬─────────┬────────┬────────┬───────┬────────┐
+│ (index) │ nome   │ nivel │ hp      │ mp      │ ataque │ defesa │ magia │ titulo │
+├─────────┼────────┼───────┼─────────┼─────────┼────────┼────────┼───────┼────────┤
+│ 0       │ 'Dora' │ 8     │ '83/83' │ '50/50' │ 15     │ 16     │ 21    │ '—'    │
+└─────────┴────────┴───────┴─────────┴─────────┴────────┴────────┴───────┴────────┘
+
+--- 9. O MISTÉRIO: reunir os três fragmentos revela o Santuário ---
+  » ✦ SEGREDO REVELADO: O Sino Partido ✦
+┌─────────┬─────────────┐
+│ (index) │ fn_dar_item │
+├─────────┼─────────────┤
+│ 0       │ null        │
+└─────────┴─────────────┘
+┌─────────┬─────────────┐
+│ (index) │ fn_dar_item │
+├─────────┼─────────────┤
+│ 0       │ null        │
+└─────────┴─────────────┘
+┌─────────┬─────────────┐
+│ (index) │ fn_dar_item │
+├─────────┼─────────────┤
+│ 0       │ null        │
+└─────────┴─────────────┘
+┌─────────┬────────────┬───────────────────────┬─────────┬───────────┬─────────┬──────┬──────┬────────────┐
+│ (index) │ personagem │ missao                │ tipo    │ progresso │ status  │ xp   │ ouro │ observacao │
+├─────────┼────────────┼───────────────────────┼─────────┼───────────┼─────────┼──────┼──────┼────────────┤
+│ 0       │ 'Dora'     │ 'O Sino que Não Toca' │ 'cacar' │ '0/1'     │ 'ativa' │ 1200 │ 500  │ 'secreta'  │
+└─────────┴────────────┴───────────────────────┴─────────┴───────────┴─────────┴──────┴──────┴────────────┘
+
+--- 10. Chefe final: O Sineiro (fraco contra sagrado — especialidade do Clérigo) ---
+  » Chegou a Vila de Brumafria. Agora é noite (21h).
+  » Comprou Cota de Malha x1 por 90 de ouro.
+  » --- Tentativa 1 ---
+  » Descansou na estalagem: HP e MP restaurados.
+  » Chegou a Santuário do Sino Partido. Agora é dia (7h).
+  » Batalha 35 iniciada: Dora vs O Sineiro.
+  » Turno 1 | Dora HP 86/86 MP 45/50 | O Sineiro HP 176/208 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 86/86 MP 40/50 | O Sineiro HP 142/208 | EM_ANDAMENTO
+  » Turno 3 | Dora HP 65/86 MP 35/50 | O Sineiro HP 87/208 | EM_ANDAMENTO
+  » Turno 4 | Dora HP 40/86 MP 30/50 | O Sineiro HP 49/208 | EM_ANDAMENTO
+  » Turno 5 | Dora HP 3/86 MP 25/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 6 | Dora HP 30/86 MP 21/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 7 | Dora HP 33/86 MP 17/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 8 | Dora HP 25/86 MP 13/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 9 | Dora HP 16/86 MP 9/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 10 | Dora HP 15/86 MP 5/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 11 | Dora HP 20/86 MP 1/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 12 | Dora HP 42/86 MP 1/50 | O Sineiro HP 26/208 | EM_ANDAMENTO
+  » Turno 13 | Dora HP 21/86 MP 1/50 | O Sineiro HP 26/208 | DERROTA
+  » === Batalha 35 terminou: DERROTA ===
+  » --- Tentativa 2 ---
+  » Descansou na estalagem: HP e MP restaurados.
+  » Chegou a Santuário do Sino Partido. Agora é noite (18h).
+  » Batalha 36 iniciada: Dora vs O Sineiro.
+  » Turno 1 | Dora HP 62/86 MP 45/50 | O Sineiro HP 179/208 | EM_ANDAMENTO
+  » Turno 2 | Dora HP 42/86 MP 40/50 | O Sineiro HP 148/208 | EM_ANDAMENTO
+  » Turno 3 | Dora HP 23/86 MP 35/50 | O Sineiro HP 102/208 | EM_ANDAMENTO
+  » Turno 4 | Dora HP 53/86 MP 31/50 | O Sineiro HP 102/208 | EM_ANDAMENTO
+  » Turno 5 | Dora HP 53/86 MP 26/50 | O Sineiro HP 43/208 | EM_ANDAMENTO
+  » Turno 6 | Dora HP 13/86 MP 21/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 7 | Dora HP 7/86 MP 17/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 8 | Dora HP 10/86 MP 13/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 9 | Dora HP 10/86 MP 9/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 10 | Dora HP 10/86 MP 5/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 11 | Dora HP 14/86 MP 1/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 12 | Dora HP 43/86 MP 1/50 | O Sineiro HP 9/208 | EM_ANDAMENTO
+  » Turno 13 | Dora HP 3/86 MP 1/50 | O Sineiro HP 2/208 | EM_ANDAMENTO
+  » Turno 14 | Dora HP 63/86 MP 1/50 | O Sineiro HP 2/208 | EM_ANDAMENTO
+  » Turno 15 | Dora HP 31/86 MP 1/50 | O Sineiro HP 2/208 | EM_ANDAMENTO
+  » Turno 16 | Dora HP 59/86 MP 1/50 | O Sineiro HP 2/208 | EM_ANDAMENTO
+  » Turno 17 | Dora HP 20/86 MP 1/50 | O Sineiro HP 2/208 | EM_ANDAMENTO
+  » Turno 18 | Dora HP 45/86 MP 1/50 | O Sineiro HP 2/208 | EM_ANDAMENTO
+  » ▲ Dora subiu para o nível 10!
+  » ▲ Dora subiu para o nível 12!
+  » ✔ Missão concluída: O Sino que Não Toca
+  » Turno 19 | Dora HP 115/115 MP 68/68 | O Sineiro HP 0/208 | VITORIA
+  » === Batalha 36 terminou: VITORIA ===
+┌─────────┬─────────────┐
+│ (index) │ fn_dar_item │
+├─────────┼─────────────┤
+│ 0       │ null        │
+└─────────┴─────────────┘
+┌─────────┬───────┬──────────────┬────────────────────────────────────────────────────────────────────────────────────┐
+│ (index) │ turno │ ator         │ mensagem                                                                           │
+├─────────┼───────┼──────────────┼────────────────────────────────────────────────────────────────────────────────────┤
+│ 0       │ 0     │ 'sistema'    │ 'Dora encontra O Sineiro (nível 8, 208 HP) — aquele que calou o sino.'             │
+│ 1       │ 1     │ 'personagem' │ 'Dora usa Julgamento Sagrado (sagrado): d20=10, acerto — 29 de dano (fraqueza!).'  │
+│ 2       │ 1     │ 'monstro'    │ 'O Sineiro ataca: d20=20, CRÍTICO — 24 de dano (fortalecido pela noite).'          │
+│ 3       │ 2     │ 'personagem' │ 'Dora usa Julgamento Sagrado (sagrado): d20=9, acerto — 31 de dano (fraqueza!).'   │
+│ 4       │ 2     │ 'monstro'    │ 'O Sineiro ataca: d20=12, acerto — 20 de dano (fortalecido pela noite).'           │
+│ 5       │ 3     │ 'personagem' │ 'Dora usa Julgamento Sagrado (sagrado): d20=19, CRÍTICO — 46 de dano (fraqueza!).' │
+│ 6       │ 3     │ 'monstro'    │ 'O Sineiro ataca: d20=13, acerto — 19 de dano (fortalecido pela noite).'           │
+│ 7       │ 4     │ 'personagem' │ 'Dora usa Cura e recupera 30 HP.'                                                  │
+│ 8       │ 4     │ 'monstro'    │ 'O Sineiro ataca: d20=1, falha crítica — 0 de dano.'                               │
+│ 9       │ 5     │ 'personagem' │ 'Dora usa Julgamento Sagrado (sagrado): d20=20, CRÍTICO — 59 de dano (fraqueza!).' │
+│ 10      │ 5     │ 'monstro'    │ 'O Sineiro ataca: d20=6, errou — 0 de dano.'                                       │
+│ 11      │ 6     │ 'personagem' │ 'Dora usa Julgamento Sagrado (sagrado): d20=16, acerto — 34 de dano (fraqueza!).'  │
+│ 12      │ 6     │ 'monstro'    │ 'O Sineiro ataca: d20=16, acerto — 40 de dano (fúria!).'                           │
+│ 13      │ 7     │ 'personagem' │ 'Dora usa Cura e recupera 28 HP.'                                                  │
+│ 14      │ 7     │ 'monstro'    │ 'O Sineiro ataca: d20=7, acerto — 34 de dano (fúria!).'                            │
+│ 15      │ 8     │ 'personagem' │ 'Dora usa Cura e recupera 29 HP.'                                                  │
+│ 16      │ 8     │ 'monstro'    │ 'O Sineiro ataca: d20=13, acerto — 26 de dano (fúria!).'                           │
+│ 17      │ 9     │ 'personagem' │ 'Dora usa Cura e recupera 29 HP.'                                                  │
+│ 18      │ 9     │ 'monstro'    │ 'O Sineiro ataca: d20=19, acerto — 29 de dano (fúria!).'                           │
+│ 19      │ 10    │ 'personagem' │ 'Dora usa Cura e recupera 27 HP.'                                                  │
+│ 20      │ 10    │ 'monstro'    │ 'O Sineiro ataca: d20=19, acerto — 27 de dano (fúria!).'                           │
+│ 21      │ 11    │ 'personagem' │ 'Dora usa Cura e recupera 31 HP.'                                                  │
+│ 22      │ 11    │ 'monstro'    │ 'O Sineiro ataca: d20=11, acerto — 27 de dano (fúria!).'                           │
+│ 23      │ 12    │ 'personagem' │ 'Dora usa Poção Maior (+60 HP, +0 MP).'                                            │
+│ 24      │ 12    │ 'monstro'    │ 'O Sineiro ataca: d20=16, acerto — 31 de dano (fúria!).'                           │
+│ 25      │ 13    │ 'personagem' │ 'Dora ataca O Sineiro: d20=14, acerto — 7 de dano.'                                │
+│ 26      │ 13    │ 'monstro'    │ 'O Sineiro ataca: d20=15, acerto — 40 de dano (fúria!).'                           │
+│ 27      │ 14    │ 'personagem' │ 'Dora usa Poção Maior (+60 HP, +0 MP).'                                            │
+│ 28      │ 14    │ 'monstro'    │ 'O Sineiro ataca: d20=5, errou — 0 de dano.'                                       │
+│ 29      │ 15    │ 'personagem' │ 'Dora ataca O Sineiro: d20=8, errou — 0 de dano.'                                  │
+│ 30      │ 15    │ 'monstro'    │ 'O Sineiro ataca: d20=19, acerto — 32 de dano (fúria!).'                           │
+│ 31      │ 16    │ 'personagem' │ 'Dora usa Poção Maior (+60 HP, +0 MP).'                                            │
+│ 32      │ 16    │ 'monstro'    │ 'O Sineiro ataca: d20=18, acerto — 27 de dano (fúria!).'                           │
+│ 33      │ 17    │ 'personagem' │ 'Dora ataca O Sineiro: d20=4, errou — 0 de dano.'                                  │
+│ 34      │ 17    │ 'monstro'    │ 'O Sineiro ataca: d20=19, acerto — 39 de dano (fúria!).'                           │
+│ 35      │ 18    │ 'personagem' │ 'Dora usa Poção Menor (+25 HP, +0 MP).'                                            │
+│ 36      │ 18    │ 'monstro'    │ 'O Sineiro ataca: d20=5, errou — 0 de dano.'                                       │
+│ 37      │ 19    │ 'personagem' │ 'Dora ataca O Sineiro: d20=11, acerto — 11 de dano.'                               │
+│ 38      │ 19    │ 'sistema'    │ 'Vitória! +900 XP, +229 ouro.'                                                     │
+│ 39      │ 19    │ 'sistema'    │ 'Saque: Sino Restaurado x1'                                                        │
+└─────────┴───────┴──────────────┴────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────┬────────────┬───────────────────────┬─────────┬───────────┬─────────────┬──────┬──────┬────────────┐
+│ (index) │ personagem │ missao                │ tipo    │ progresso │ status      │ xp   │ ouro │ observacao │
+├─────────┼────────────┼───────────────────────┼─────────┼───────────┼─────────────┼──────┼──────┼────────────┤
+│ 0       │ 'Dora'     │ 'O Sino que Não Toca' │ 'cacar' │ '1/1'     │ 'concluida' │ 1200 │ 500  │ 'secreta'  │
+└─────────┴────────────┴───────────────────────┴─────────┴───────────┴─────────────┴──────┴──────┴────────────┘
+┌─────────┬───────────────────────┬──────────────┬────────────┬──────────┬───────────────────────────────────────┐
+│ (index) │ item                  │ tipo         │ raridade   │ equipado │ bonus                                 │
+├─────────┼───────────────────────┼──────────────┼────────────┼──────────┼───────────────────────────────────────┤
+│ 0       │ 'Maça de Peregrino'   │ 'arma'       │ 'comum'    │ 'sim'    │ 'ATQ+2 MAG+2'                         │
+│ 1       │ 'Cota de Malha'       │ 'armadura'   │ 'incomum'  │ 'sim'    │ 'DEF+5 VIT+1 AGI-1'                   │
+│ 2       │ 'Gibão de Couro'      │ 'armadura'   │ 'comum'    │ ''       │ 'DEF+2'                               │
+│ 3       │ 'Sino Restaurado'     │ 'acessorio'  │ 'lendario' │ ''       │ 'ATQ+3 DEF+3 VIT+3 MAG+3 AGI+3 SOR+3' │
+│ 4       │ 'Erva Amarga'         │ 'consumivel' │ 'comum'    │ ''       │ null                                  │
+│ 5       │ 'Brasa Viva'          │ 'material'   │ 'incomum'  │ ''       │ null                                  │
+│ 6       │ 'Couro de Lobo'       │ 'material'   │ 'comum'    │ ''       │ null                                  │
+│ 7       │ 'Fragmento da Alça'   │ 'fragmento'  │ 'lendario' │ ''       │ null                                  │
+│ 8       │ 'Fragmento da Boca'   │ 'fragmento'  │ 'lendario' │ ''       │ null                                  │
+│ 9       │ 'Fragmento do Badalo' │ 'fragmento'  │ 'lendario' │ ''       │ null                                  │
+└─────────┴───────────────────────┴──────────────┴────────────┴──────────┴───────────────────────────────────────┘
+
+--- 11. Crônica, conquistas e títulos ---
+┌─────────┬────────────┬─────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ (index) │ personagem │ tipo        │ mensagem                                                                                                                                                              │
+├─────────┼────────────┼─────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 0       │ 'Dora'     │ 'origem'    │ 'Dora, Clérigo, desperta em Vila de Brumafria ouvindo um sino que ninguém mais escuta.'                                                                               │
+│ 1       │ 'Dora'     │ 'viagem'    │ 'Chegou a Bosque dos Sussurros. Árvores que repetem o que você acabou de pensar.'                                                                                     │
+│ 2       │ 'Dora'     │ 'conquista' │ 'Conquista desbloqueada: Primeiro Sangue — Vença sua primeira batalha.'                                                                                               │
+│ 3       │ 'Dora'     │ 'nivel'     │ 'Dora alcançou o nível 2!'                                                                                                                                            │
+│ 4       │ 'Dora'     │ 'nivel'     │ 'Dora alcançou o nível 8!'                                                                                                                                            │
+│ 5       │ 'Dora'     │ 'conquista' │ 'Conquista desbloqueada: Veterano — Alcance o nível 5.'                                                                                                               │
+│ 6       │ 'Dora'     │ 'segredo'   │ 'Os três fragmentos se encaixam nas suas mãos e, por um instante, o sino da vila TOCA. A névoa se abre e revela uma escada sob a torre: o Santuário do Sino Partido.' │
+│ 7       │ 'Dora'     │ 'viagem'    │ 'Chegou a Vila de Brumafria. Uma vila sob névoa eterna. O sino da torre está mudo há cem anos.'                                                                       │
+│ 8       │ 'Dora'     │ 'viagem'    │ 'Chegou a Santuário do Sino Partido. O lugar onde o som foi enterrado.'                                                                                               │
+│ 9       │ 'Dora'     │ 'derrota'   │ 'Derrotado por O Sineiro.'                                                                                                                                            │
+│ 10      │ 'Dora'     │ 'conquista' │ 'Conquista desbloqueada: Aquele que Voltou — Seja derrotado e volte a lutar.'                                                                                         │
+│ 11      │ 'Dora'     │ 'conquista' │ 'Conquista desbloqueada: Ouvinte do Sino — Revele o segredo do sino.'                                                                                                 │
+│ 12      │ 'Dora'     │ 'viagem'    │ 'Chegou a Santuário do Sino Partido. O lugar onde o som foi enterrado.'                                                                                               │
+│ 13      │ 'Dora'     │ 'nivel'     │ 'Dora alcançou o nível 10!'                                                                                                                                           │
+│ 14      │ 'Dora'     │ 'conquista' │ 'Conquista desbloqueada: Quebra-Coroas — Derrote um chefe.'                                                                                                           │
+│ 15      │ 'Dora'     │ 'nivel'     │ 'Dora alcançou o nível 12!'                                                                                                                                           │
+│ 16      │ 'Dora'     │ 'missao'    │ 'Missão concluída: "O Sino que Não Toca" (+1200 XP, +500 ouro).'                                                                                                      │
+│ 17      │ 'Dora'     │ 'chefe'     │ 'Dora derrotou O Sineiro.'                                                                                                                                            │
+└─────────┴────────────┴─────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────┬─────────┬─────────────────────┬─────────────────┐
+│ (index) │ nome    │ conquista           │ titulo_atual    │
+├─────────┼─────────┼─────────────────────┼─────────────────┤
+│ 0       │ 'Aria'  │ 'Primeiro Sangue'   │ ''              │
+│ 1       │ 'Bento' │ 'Primeiro Sangue'   │ ''              │
+│ 2       │ 'Cael'  │ 'Primeiro Sangue'   │ ''              │
+│ 3       │ 'Dora'  │ 'Primeiro Sangue'   │ 'Quebra-Coroas' │
+│ 4       │ 'Dora'  │ 'Veterano'          │ 'Quebra-Coroas' │
+│ 5       │ 'Dora'  │ 'Ouvinte do Sino'   │ 'Quebra-Coroas' │
+│ 6       │ 'Dora'  │ 'Quebra-Coroas'     │ 'Quebra-Coroas' │
+│ 7       │ 'Dora'  │ 'Aquele que Voltou' │ 'Quebra-Coroas' │
+└─────────┴─────────┴─────────────────────┴─────────────────┘
+┌─────────┬─────────┬─────────┬─────────────────┬─────────────┬───────┬──────┬──────────┬──────────┬────────┬──────────────┬────────────┬───────────────────┐
+│ (index) │ posicao │ nome    │ titulo          │ classe      │ nivel │ xp   │ vitorias │ derrotas │ chefes │ taxa_vitoria │ conquistas │ posicao_na_classe │
+├─────────┼─────────┼─────────┼─────────────────┼─────────────┼───────┼──────┼──────────┼──────────┼────────┼──────────────┼────────────┼───────────────────┤
+│ 0       │ 1       │ 'Dora'  │ 'Quebra-Coroas' │ 'Clérigo'   │ 12    │ 3952 │ 8        │ 1        │ 1      │ '88.9'       │ 5          │ 1                 │
+│ 1       │ 2       │ 'Aria'  │ ''              │ 'Guerreiro' │ 3     │ 371  │ 9        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+│ 2       │ 3       │ 'Bento' │ ''              │ 'Mago'      │ 2     │ 279  │ 8        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+│ 3       │ 4       │ 'Cael'  │ ''              │ 'Ladino'    │ 2     │ 224  │ 8        │ 0        │ 0      │ '100.0'      │ 1          │ 1                 │
+└─────────┴─────────┴─────────┴─────────────────┴─────────────┴───────┴──────┴──────────┴──────────┴────────┴──────────────┴────────────┴───────────────────┘
+
+--- 12. Auditoria automática (trigger parametrizado) ---
+┌─────────┬─────────────┬────────────┐
+│ (index) │ campo       │ alteracoes │
+├─────────┼─────────────┼────────────┤
+│ 0       │ 'nivel'     │ 8          │
+│ 1       │ 'ouro'      │ 42         │
+│ 2       │ 'regiao_id' │ 8          │
+│ 3       │ 'titulo'    │ 2          │
+│ 4       │ 'xp'        │ 36         │
+└─────────┴─────────────┴────────────┘
+┌─────────┬────────────┬──────────┬───────────────────┬───────────────────┐
+│ (index) │ personagem │ campo    │ valor_antigo      │ valor_novo        │
+├─────────┼────────────┼──────────┼───────────────────┼───────────────────┤
+│ 0       │ 1          │ 'nivel'  │ '1'               │ '2'               │
+│ 1       │ 1          │ 'nivel'  │ '2'               │ '3'               │
+│ 2       │ 2          │ 'nivel'  │ '1'               │ '2'               │
+│ 3       │ 3          │ 'nivel'  │ '1'               │ '2'               │
+│ 4       │ 4          │ 'nivel'  │ '1'               │ '2'               │
+│ 5       │ 4          │ 'nivel'  │ '2'               │ '8'               │
+│ 6       │ 4          │ 'titulo' │ null              │ 'Ouvinte do Sino' │
+│ 7       │ 4          │ 'nivel'  │ '8'               │ '10'              │
+│ 8       │ 4          │ 'titulo' │ 'Ouvinte do Sino' │ 'Quebra-Coroas'   │
+│ 9       │ 4          │ 'nivel'  │ '10'              │ '12'              │
+└─────────┴────────────┴──────────┴───────────────────┴───────────────────┘
+
+--- 13. Segurança: o jogador só age por procedures ---
+  » BLOQUEADO (trapaça): permission denied for table personagem
+  » BLOQUEADO (spoiler): permission denied for table segredo
+  » Chegou a Vila de Brumafria. Agora é noite (21h).
+┌─────────┬────────┬──────┬─────────────────────┐
+│ (index) │ nome   │ ouro │ regiao              │
+├─────────┼────────┼──────┼─────────────────────┤
+│ 0       │ 'Cael' │ 27   │ 'Vila de Brumafria' │
+└─────────┴────────┴──────┴─────────────────────┘

@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ecos de Brumafria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1014;
+    --nevoa: #141920;
+    --painel: #181e26;
+    --painel-2: #1f2630;
+    --borda: #2b3440;
+    --texto: #e7e2d6;
+    --texto-2: #9aa1ab;
+    --bronze: #c9a463;
+    --bronze-2: #8f7140;
+    --hp: #c4473d;
+    --mp: #4b7fd1;
+    --xp: #c9a463;
+    --ok: #5aa66f;
+    --erro: #d0574c;
+    --raro: #5f9de0;
+    --epico: #a774e0;
+    --lendario: #e0a03a;
+    --raio: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -200px, #1c2330 0%, var(--bg) 60%) fixed, var(--bg);
+    color: var(--texto);
+    font: 14px/1.5 Inter, system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  h1, h2, h3 { font-family: Cinzel, Georgia, serif; font-weight: 700; margin: 0; letter-spacing: .02em; }
+  h2 { font-size: 15px; color: var(--bronze); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+  button {
+    font: inherit; color: var(--texto); background: var(--painel-2); border: 1px solid var(--borda);
+    border-radius: 8px; padding: 7px 12px; cursor: pointer; transition: border-color .15s, background .15s, transform .05s;
+  }
+  button:hover:not(:disabled) { border-color: var(--bronze-2); background: #26303c; }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.primario { background: var(--bronze); color: #1a1408; border-color: var(--bronze); font-weight: 600; }
+  button.primario:hover:not(:disabled) { background: #d8b677; }
+  button.perigo { border-color: #5a2a26; }
+  button.mini { padding: 3px 8px; font-size: 12px; }
+  input, select {
+    font: inherit; color: var(--texto); background: var(--nevoa); border: 1px solid var(--borda);
+    border-radius: 8px; padding: 8px 10px; width: 100%;
+  }
+  input:focus, select:focus, button:focus-visible { outline: 2px solid var(--bronze-2); outline-offset: 1px; }
+
+  header {
+    display: flex; align-items: center; gap: 16px; justify-content: space-between; flex-wrap: wrap;
+    padding: 14px 24px; border-bottom: 1px solid var(--borda); background: rgba(13,16,20,.7);
+    position: sticky; top: 0; backdrop-filter: blur(6px); z-index: 5;
+  }
+  header h1 { font-size: 20px; color: var(--bronze); }
+  header h1 span { color: var(--texto-2); font-size: 12px; font-family: Inter, sans-serif; font-weight: 400; margin-left: 8px; letter-spacing: 0; }
+  .relogio { display: flex; align-items: center; gap: 8px; color: var(--texto-2); }
+  .pilula { border: 1px solid var(--borda); border-radius: 99px; padding: 3px 10px; font-size: 12px; }
+  .pilula.noite { border-color: #3e4a7a; color: #aab6ec; }
+  .pilula.dia { border-color: #6a5a30; color: #e5cc8a; }
+
+  main { max-width: 1320px; margin: 0 auto; padding: 20px 16px 60px; }
+  .painel { background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px; }
+  .grade { display: grid; grid-template-columns: 290px 1fr 340px; gap: 16px; align-items: start; }
+  @media (max-width: 1100px) { .grade { grid-template-columns: 1fr 1fr; } .grade > .centro { grid-column: 1 / -1; order: -1; } }
+  @media (max-width: 720px) { .grade { grid-template-columns: 1fr; } header { padding: 12px 16px; } }
+  .pilha > * + * { margin-top: 16px; }
+  .muted { color: var(--texto-2); }
+  .linha { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .entre { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+  /* lobby */
+  .lobby { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .lobby { grid-template-columns: 1fr; } }
+  .intro { grid-column: 1 / -1; text-align: center; padding: 28px 16px; }
+  .intro h2 { font-size: 26px; text-transform: none; letter-spacing: .02em; color: var(--texto); }
+  .intro p { max-width: 620px; margin: 10px auto 0; color: var(--texto-2); font-style: italic; }
+  .herois { display: grid; gap: 8px; }
+  .heroi { display: flex; justify-content: space-between; align-items: center; text-align: left; width: 100%; padding: 10px 12px; }
+  .classes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .classe { text-align: left; padding: 10px; }
+  .classe.sel { border-color: var(--bronze); background: #2a2a24; }
+  .classe b { font-family: Cinzel, serif; }
+  .classe small { display: block; color: var(--texto-2); margin-top: 2px; }
+  .atrs-mini { font-size: 11px; color: var(--texto-2); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  /* ficha */
+  .nome-heroi { font-size: 22px; }
+  .titulo-heroi { color: var(--bronze); font-style: italic; font-size: 13px; min-height: 18px; }
+  .barra { margin-top: 10px; }
+  .barra .rotulo { display: flex; justify-content: space-between; font-size: 12px; color: var(--texto-2); font-variant-numeric: tabular-nums; }
+  .barra .trilho { height: 9px; background: #0c0f13; border-radius: 99px; overflow: hidden; border: 1px solid #222a33; margin-top: 3px; }
+  .barra .cheio { height: 100%; border-radius: 99px; transition: width .4s ease; }
+  .atributos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 14px; }
+  .atributo { background: var(--nevoa); border: 1px solid var(--borda); border-radius: 8px; padding: 6px; text-align: center; }
+  .atributo b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+  .atributo span { font-size: 10px; color: var(--texto-2); text-transform: uppercase; letter-spacing: .06em; }
+  .ouro { margin-top: 12px; color: var(--lendario); font-weight: 600; }
+
+  /* cena */
+  .cena h3 { font-size: 22px; }
+  .cena p.desc { color: var(--texto-2); font-style: italic; margin: 6px 0 0; }
+  .secao { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--borda); }
+  .secao h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-2); font-weight: 600; }
+
+  .combate { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+  .monstro h3 { font-size: 20px; }
+  .monstro .chefe { color: var(--lendario); font-size: 11px; border: 1px solid #6a4d1c; border-radius: 99px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; font-family: Inter; }
+  .dado {
+    width: 86px; height: 86px; display: grid; place-items: center; position: relative;
+    font-family: Cinzel, serif; font-size: 30px; font-weight: 700; color: var(--texto);
+  }
+  .dado svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .dado span { position: relative; }
+  .dado.critico { color: var(--lendario); }
+  .dado.falha { color: var(--erro); }
+  .dado.rolando { animation: rolar .5s ease-out; }
+  @keyframes rolar { 0% { transform: rotate(-200deg) scale(.6); opacity: .3; } 100% { transform: none; opacity: 1; } }
+  .dado-legenda { text-align: center; font-size: 11px; color: var(--texto-2); }
+
+  .acoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .acoes button { text-align: left; }
+  .acoes button small { display: block; color: var(--texto-2); font-size: 11px; }
+  .acoes button.primario small { color: #4a3a1c; }
+  .log { max-height: 300px; overflow-y: auto; background: #0e1217; border: 1px solid var(--borda); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .log div { padding: 3px 0; border-bottom: 1px solid #161c23; }
+  .log div:last-child { border-bottom: 0; }
+  .log .personagem { color: #d6e3f5; }
+  .log .monstro { color: #f0c1bb; }
+  .log .sistema { color: var(--bronze); }
+  .log .crit { font-weight: 600; }
+  .log .t { color: var(--texto-2); font-size: 11px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .resultado { font-family: Cinzel, serif; font-size: 18px; text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+  .resultado.vitoria { background: #1d2e22; color: #9fe0b0; }
+  .resultado.derrota { background: #321b19; color: #f3a69e; }
+  .resultado.fuga { background: #252a33; color: var(--texto-2); }
+
+  /* abas */
+  .abas { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--borda); }
+  .abas button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 8px 10px; color: var(--texto-2); }
+  .abas button.ativa { color: var(--bronze); border-bottom-color: var(--bronze); }
+  .lista { display: grid; gap: 8px; }
+  .item { background: var(--nevoa); border: 1px solid var(--borda); border-radius: 8px; padding: 8px 10px; }
+  .item.equipado { border-color: var(--bronze-2); }
+  .item .nome { font-weight: 600; }
+  .item .meta { font-size: 12px; color: var(--texto-2); }
+  .item .botoes { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .r-incomum { color: #8fd29f; } .r-raro { color: var(--raro); } .r-epico { color: var(--epico); } .r-lendario { color: var(--lendario); }
+  .tag { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; border: 1px solid var(--borda); border-radius: 99px; padding: 0 6px; margin-left: 4px; color: var(--texto-2); }
+  .cronica div { padding: 6px 0; border-bottom: 1px solid var(--borda); font-size: 13px; }
+  .cronica .tipo { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--bronze); display: block; }
+  .cronica .segredo { color: var(--lendario); font-style: italic; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--borda); }
+  th { color: var(--texto-2); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* avisos */
+  #avisos { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 20; max-width: min(420px, calc(100vw - 32px)); }
+  .aviso { background: #1d242d; border: 1px solid var(--borda); border-left: 3px solid var(--bronze); border-radius: 8px; padding: 9px 12px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.4); animation: entrar .2s ease-out; }
+  .aviso.erro { border-left-color: var(--erro); }
+  .aviso.especial { border-left-color: var(--lendario); background: #2a2416; }
+  @keyframes entrar { from { transform: translateY(8px); opacity: 0; } }
+  .vazio { color: var(--texto-2); font-style: italic; font-size: 13px; }
+  .carregando { opacity: .6; pointer-events: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ecos de Brumafria <span>RPG dirigido por PostgreSQL</span></h1>
+  <div class="relogio" id="relogio"></div>
+</header>
+<main id="app"></main>
+<div id="avisos" aria-live="polite"></div>
+
+<script>
+const $app = document.getElementById('app');
+const S = { p: Number(localStorage.getItem('heroi')) || null, aba: 'mochila', classeSel: 'Guerreiro', ultimoLog: 0 };
+
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pct = (a, b) => Math.max(0, Math.min(100, b ? (a / b) * 100 : 0));
+
+async function api(caminho, corpo) {
+  const r = await fetch(caminho, corpo ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) } : {});
+  return r.json();
+}
+
+function avisar(texto, tipo = '') {
+  const el = document.createElement('div');
+  el.className = 'aviso ' + tipo;
+  el.textContent = texto;
+  document.getElementById('avisos').append(el);
+  setTimeout(() => el.remove(), tipo === 'erro' ? 6000 : 4200);
+}
+
+// envia uma ação (CALL de procedure) e redesenha
+async function agir(acao_jogo, dados = {}) {
+  $app.classList.add('carregando');
+  try {
+    const r = await api('/api/acao', { acao_jogo, p: S.p, ...dados });
+    // avisos relevantes (os de turno aparecem no registro de combate)
+    for (const m of r.mensagens || []) {
+      if (/^Turno \d|^Batalha \d+ iniciada/.test(m)) continue;
+      avisar(m, /SEGREDO|subiu|Missão concluída|terminou: VITORIA/.test(m) ? 'especial' : '');
+    }
+    if (!r.ok) avisar(r.erro, 'erro');
+    if (acao_jogo === 'criar' && r.ok) { S.p = r.retorno.p_id; localStorage.setItem('heroi', S.p); }
+  } finally {
+    $app.classList.remove('carregando');
+  }
+  await desenhar();
+}
+
+// ------------------------------------------------------------------ LOBBY
+async function desenharLobby() {
+  document.getElementById('relogio').innerHTML = '';
+  const L = await api('/api/lobby');
+  const classe = L.classes.find((c) => c.nome === S.classeSel) || L.classes[0];
+  $app.innerHTML = `
+  <div class="lobby">
+    <div class="painel intro">
+      <h2>O sino está mudo há cem anos</h2>
+      <p>Brumafria vive sob uma névoa que não se dissipa. Dizem que o sino da torre se partiu em três,
+      e que quem reunir os pedaços vai ouvi-lo tocar outra vez.</p>
+    </div>
+    <div class="painel">
+      <h2>Heróis</h2>
+      <div class="herois">
+        ${L.personagens.length ? L.personagens.map((h) => `
+          <button class="heroi" data-heroi="${h.id}">
+            <span><b>${esc(h.nome)}</b> <span class="muted">${h.titulo !== '—' ? esc(h.titulo) : ''}</span><br>
+              <small class="muted">${esc(h.classe)} · nível ${h.nivel} · ${esc(h.regiao)}</small></span>
+            <span>Jogar →</span>
+          </button>`).join('') : '<p class="vazio">Nenhum herói ainda. Crie o primeiro ao lado.</p>'}
+      </div>
+      ${L.ranking.length ? `
+      <div class="secao"><h4>Ranking</h4>
+        <table><thead><tr><th>#</th><th>Herói</th><th>Classe</th><th class="num">Nív.</th><th class="num">V</th><th class="num">D</th><th class="num">Chefes</th></tr></thead>
+        <tbody>${L.ranking.map((r) => `<tr><td>${r.posicao}</td><td>${esc(r.nome)}</td><td>${esc(r.classe)}</td>
+          <td class="num">${r.nivel}</td><td class="num">${r.vitorias}</td><td class="num">${r.derrotas}</td><td class="num">${r.chefes}</td></tr>`).join('')}</tbody></table>
+      </div>` : ''}
+    </div>
+    <div class="painel">
+      <h2>Novo herói</h2>
+      <form id="form-criar">
+        <input id="nome" placeholder="Nome do herói" maxlength="40" required autocomplete="off">
+        <div class="classes">
+          ${L.classes.map((c) => `
+            <button type="button" class="classe ${c.nome === classe.nome ? 'sel' : ''}" data-classe="${esc(c.nome)}">
+              <b>${esc(c.nome)}</b> <span class="muted">${c.dado}</span>
+              <small>${esc(c.descricao)}</small>
+              <div class="atrs-mini">${Object.entries(c.atributos).map(([k, v]) => `${k} ${v}`).join(' · ')}</div>
+            </button>`).join('')}
+        </div>
+        <button class="primario" type="submit" style="width:100%">Criar ${esc(classe.nome)}</button>
+      </form>
+      <div class="secao entre">
+        <span class="muted" style="font-size:12px">Apaga todos os heróis e recria o banco.</span>
+        <button class="perigo mini" id="reiniciar">Reiniciar mundo</button>
+      </div>
+    </div>
+  </div>`;
+
+  $app.querySelectorAll('[data-heroi]').forEach((b) => b.onclick = () => { S.p = Number(b.dataset.heroi); localStorage.setItem('heroi', S.p); desenhar(); });
+  $app.querySelectorAll('[data-classe]').forEach((b) => b.onclick = () => { S.classeSel = b.dataset.classe; const n = document.getElementById('nome').value; desenharLobby().then(() => document.getElementById('nome').value = n); });
+  document.getElementById('form-criar').onsubmit = (e) => { e.preventDefault(); agir('criar', { nome: document.getElementById('nome').value, classe: S.classeSel }); };
+  document.getElementById('reiniciar').onclick = async () => {
+    if (!confirm('Apagar todos os heróis e recomeçar o mundo?')) return;
+    await api('/api/reiniciar', {}); S.p = null; localStorage.removeItem('heroi'); avisar('O mundo foi recriado.'); desenhar();
+  };
+}
+
+// ------------------------------------------------------------------ JOGO
+function barra(rotulo, atual, max, cor, extra = '') {
+  return `<div class="barra"><div class="rotulo"><span>${rotulo}</span><span>${atual} / ${max}${extra}</span></div>
+    <div class="trilho"><div class="cheio" style="width:${pct(atual, max)}%;background:${cor}"></div></div></div>`;
+}
+
+function dadoSvg() {
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,4 93,28 93,72 50,96 7,72 7,28" fill="#1f2630" stroke="#c9a463" stroke-width="2.5"/>
+    <polygon points="50,22 76,66 24,66" fill="none" stroke="#8f7140" stroke-width="1.5"/>
+    <line x1="50" y1="4" x2="50" y2="22" stroke="#8f7140" stroke-width="1.2"/><line x1="93" y1="72" x2="76" y2="66" stroke="#8f7140" stroke-width="1.2"/><line x1="7" y1="72" x2="24" y2="66" stroke="#8f7140" stroke-width="1.2"/></svg>`;
+}
+
+function desenharFicha(f) {
+  const xpFaixa = f.xp_proximo_nivel - f.xp_nivel_atual;
+  return `<div class="painel">
+    <div class="entre"><h3 class="nome-heroi">${esc(f.nome)}</h3><button class="mini" id="trocar">Trocar</button></div>
+    <div class="titulo-heroi">${f.titulo !== '—' ? esc(f.titulo) : ''}</div>
+    <div class="muted">${esc(f.classe)} · nível ${f.nivel}</div>
+    ${barra('Vida', f.hp_atual, f.hp_max, 'var(--hp)')}
+    ${barra('Magia', f.mp_atual, f.mp_max, 'var(--mp)')}
+    ${barra('Experiência', f.xp - f.xp_nivel_atual, xpFaixa, 'var(--xp)')}
+    <div class="atributos">
+      ${[['ataque', 'Ataque'], ['defesa', 'Defesa'], ['vitalidade', 'Vitalid.'], ['magia', 'Magia'], ['agilidade', 'Agilid.'], ['sorte', 'Sorte']]
+        .map(([k, r]) => `<div class="atributo"><b>${f[k]}</b><span>${r}</span></div>`).join('')}
+    </div>
+    <div class="ouro">◈ ${f.ouro} ouro</div>
+  </div>`;
+}
+
+function desenharLog(log) {
+  if (!log.length) return '';
+  return `<div class="log" id="log">${log.map((l) => `<div class="${l.ator} ${l.critico ? 'crit' : ''}"><span class="t">T${l.turno}</span>${esc(l.mensagem)}</div>`).join('')}</div>`;
+}
+
+function desenharCombate(E) {
+  const b = E.batalha, f = E.ficha;
+  const ultimo = [...E.log].reverse().find((l) => l.ator === 'personagem' && l.rolagem_d20 != null) || [...E.log].reverse().find((l) => l.rolagem_d20 != null);
+  const d = ultimo?.rolagem_d20;
+  const cls = d === 20 || ultimo?.critico ? 'critico' : d === 1 ? 'falha' : '';
+  const novo = E.log.length !== S.ultimoLog; S.ultimoLog = E.log.length;
+  const consumiveis = E.inventario.filter((i) => i.tipo === 'consumivel');
+  return `<div class="painel cena">
+    <div class="combate">
+      <div class="monstro">
+        <div class="muted" style="font-size:12px">${esc(E.regiao.nome)} · turno ${b.turno}</div>
+        <h3>${esc(b.monstro)}${b.chefe ? '<span class="chefe">CHEFE</span>' : ''}</h3>
+        <div class="muted">${esc(b.classe_monstro)} · nível ${b.nivel} · ${esc(b.elemento)} — <i>${esc(b.descricao)}</i></div>
+        ${barra('Vida', b.hp_monstro, b.hp_monstro_max, 'var(--hp)')}
+      </div>
+      <div>
+        <div class="dado ${cls} ${novo ? 'rolando' : ''}">${dadoSvg()}<span>${d ?? '—'}</span></div>
+        <div class="dado-legenda">${ultimo ? (ultimo.ator === 'personagem' ? 'sua rolagem' : 'rolagem do monstro') : 'd20'}</div>
+      </div>
+    </div>
+    <div class="secao"><h4>Ações</h4>
+      <div class="acoes">
+        <button class="primario" data-turno="atacar">Atacar<small>golpe com a arma</small></button>
+        <button data-turno="defender">Defender<small>metade do dano, +2 MP</small></button>
+        <button data-turno="fugir">Fugir<small>${b.chefe ? 'impossível contra chefes' : 'AGI contra AGI'}</small></button>
+      </div>
+    </div>
+    <div class="secao"><h4>Habilidades</h4>
+      <div class="acoes">
+        ${E.habilidades.map((h) => `<button data-turno="habilidade" data-ref="${esc(h.nome)}" ${!h.liberada || f.mp_atual < h.custo_mp ? 'disabled' : ''}
+            title="${esc(h.descricao || '')}">${esc(h.nome)}<small>${h.liberada ? `${h.custo_mp} MP · ${h.dado} ${h.cura ? 'cura' : esc(h.elemento)}` : `nível ${h.nivel_minimo}`}</small></button>`).join('')}
+      </div>
+    </div>
+    ${consumiveis.length ? `<div class="secao"><h4>Itens</h4><div class="acoes">
+      ${consumiveis.map((i) => `<button data-turno="item" data-ref="${esc(i.nome)}">${esc(i.nome)} ×${i.quantidade}<small>${i.cura_hp ? `+${i.cura_hp} HP ` : ''}${i.cura_mp ? `+${i.cura_mp} MP` : ''}</small></button>`).join('')}
+    </div></div>` : ''}
+    <div class="secao"><h4>Registro de combate</h4>${desenharLog(E.log)}</div>
+  </div>`;
+}
+
+function desenharExploracao(E) {
+  const r = E.regiao, b = E.batalha;
+  const terminada = b && b.status !== 'em_andamento';
+  const rotuloResultado = { vitoria: 'Vitória', derrota: 'Derrota', fuga: 'A batalha terminou sem vencedor' };
+  return `<div class="painel cena">
+    <div class="muted" style="font-size:12px">${r.segura ? 'Cidade · sem combates' : 'Região selvagem'}</div>
+    <h3>${esc(r.nome)}</h3>
+    <p class="desc">${esc(r.descricao)}</p>
+
+    ${r.segura ? `
+      <div class="secao"><h4>Estalagem</h4><div class="acoes">
+        <button class="primario" data-acao="descansar">Descansar<small>10 ouro · HP e MP cheios · +8h</small></button>
+        <button data-acao="esperar" data-horas="1">Esperar 1 hora<small>o tempo passa</small></button>
+        <button data-acao="esperar" data-horas="6">Esperar 6 horas<small>até mudar o período</small></button>
+      </div></div>` : `
+      <div class="secao"><h4>Caçar</h4><div class="acoes">
+        <button class="primario" data-acao="explorar">Explorar<small>encontro aleatório</small></button>
+        <button data-acao="automatico">Batalha automática<small>turnos pré-programados</small></button>
+        <button data-acao="esperar" data-horas="1">Esperar 1 hora<small>a noite traz outras criaturas</small></button>
+      </div>
+      ${E.rastros.length ? `<div style="margin-top:10px" class="muted">Rastros conhecidos</div><div class="acoes" style="margin-top:6px">
+        ${E.rastros.map((m) => `<button data-acao="explorar" data-monstro="${esc(m.nome)}" ${m.visivel ? '' : 'disabled'}>${esc(m.nome)}<small>${m.chefe ? 'chefe · ' : ''}${m.visivel ? 'à vista' : `só de ${m.periodo === 'noite' ? 'noite' : 'dia'}`}</small></button>`).join('')}
+      </div>` : ''}
+      </div>`}
+
+    <div class="secao"><h4>Viajar</h4><div class="acoes">
+      ${E.destinos.map((d) => `<button data-acao="viajar" data-regiao="${esc(d.nome)}" ${d.atual || !d.acessivel ? 'disabled' : ''}>${esc(d.nome)}<small>${d.atual ? 'você está aqui' : d.acessivel ? (d.secreta ? 'revelado pelo sino' : '+2h de viagem') : `exige nível ${d.nivel_minimo}`}</small></button>`).join('')}
+    </div></div>
+
+    ${r.segura && E.loja.length ? `<div class="secao"><h4>Mercador</h4><div class="lista">
+      ${E.loja.map((i) => `<div class="item entre"><div><span class="nome r-${i.raridade}">${esc(i.nome)}</span>
+          <div class="meta">${esc(i.tipo)}${i.bonus ? ' · ' + esc(i.bonus) : ''}${i.cura_hp ? ` · +${i.cura_hp} HP` : ''}${i.cura_mp ? ` · +${i.cura_mp} MP` : ''}${i.classe ? ' · só ' + esc(i.classe) : ''}${i.nivel_minimo > 1 ? ' · nível ' + i.nivel_minimo : ''}</div></div>
+          <button class="mini" data-acao="comprar" data-item="${esc(i.nome)}" ${E.ficha.ouro < i.preco ? 'disabled' : ''}>${i.preco} ◈</button></div>`).join('')}
+    </div></div>` : ''}
+
+    ${terminada ? `<div class="secao"><h4>Última batalha</h4>
+      <div class="resultado ${b.status}">${rotuloResultado[b.status]} — ${esc(b.monstro)}</div>${desenharLog(E.log)}</div>` : ''}
+  </div>`;
+}
+
+function desenharLateral(E) {
+  const segura = E.regiao.segura;
+  const emCombate = E.batalha?.status === 'em_andamento';
+  let corpo = '';
+  if (S.aba === 'mochila') {
+    corpo = E.inventario.length ? `<div class="lista">${E.inventario.map((i) => `
+      <div class="item ${i.equipado ? 'equipado' : ''}">
+        <div class="entre"><span class="nome r-${i.raridade}">${esc(i.nome)}${i.quantidade > 1 ? ` ×${i.quantidade}` : ''}</span>
+          <span>${i.equipado ? '<span class="tag">equipado</span>' : ''}<span class="tag">${esc(i.tipo)}</span></span></div>
+        <div class="meta">${i.bonus ? esc(i.bonus) : ''}${i.cura_hp ? `+${i.cura_hp} HP ` : ''}${i.cura_mp ? `+${i.cura_mp} MP` : ''}${i.descricao ? ` <i>${esc(i.descricao)}</i>` : ''}</div>
+        <div class="botoes">
+          ${['arma', 'armadura', 'acessorio'].includes(i.tipo) ? `<button class="mini" data-acao="equipar" data-item="${esc(i.nome)}" data-equipar="${!i.equipado}">${i.equipado ? 'Desequipar' : 'Equipar'}</button>` : ''}
+          ${i.tipo === 'consumivel' && !emCombate ? `<button class="mini" data-acao="usar" data-item="${esc(i.nome)}">Usar</button>` : ''}
+          ${segura && i.valor_venda ? `<button class="mini" data-acao="vender" data-item="${esc(i.nome)}">Vender ${i.valor_venda} ◈</button>` : ''}
+        </div>
+      </div>`).join('')}</div>` : '<p class="vazio">Mochila vazia.</p>';
+  } else if (S.aba === 'missoes') {
+    corpo = `${E.missoes.length ? `<div class="lista">${E.missoes.map((m) => `
+      <div class="item"><div class="entre"><span class="nome">${esc(m.missao)}</span><span class="tag">${m.status === 'concluida' ? 'concluída' : m.progresso}</span></div>
+        <div class="meta">${esc(m.tipo)} · ${m.xp} XP · ${m.ouro} ouro ${m.observacao ? '· <span class="r-lendario">secreta</span>' : ''}</div></div>`).join('')}</div>`
+      : '<p class="vazio">Nenhuma missão aceita.</p>'}
+      <div class="secao"><h4>Quadro de missões</h4>${E.quadro.length ? `<div class="lista">${E.quadro.map((q) => `
+        <div class="item"><span class="nome">${esc(q.missao)}</span><div class="meta">${esc(q.descricao)}</div>
+        <div class="meta">${q.recompensa_xp} XP · ${q.recompensa_ouro} ouro</div>
+        <div class="botoes"><button class="mini" data-acao="aceitar" data-quest="${esc(q.missao)}">Aceitar</button></div></div>`).join('')}</div>`
+        : '<p class="vazio">Nada disponível no seu nível.</p>'}</div>`;
+  } else {
+    corpo = `${E.conquistas.length ? `<div class="lista" style="margin-bottom:12px">${E.conquistas.map((c) => `<div class="item"><span class="nome r-lendario">★ ${esc(c.nome)}</span><div class="meta">${esc(c.descricao)}</div></div>`).join('')}</div>` : ''}
+      <div class="cronica">${E.cronica.map((c) => `<div class="${c.tipo === 'segredo' ? 'segredo' : ''}"><span class="tipo">${esc(c.tipo)}</span>${esc(c.mensagem)}</div>`).join('')}</div>`;
+  }
+  return `<div class="painel">
+    <div class="abas" role="tablist">
+      ${[['mochila', 'Mochila'], ['missoes', 'Missões'], ['cronica', 'Crônica']].map(([k, r]) => `<button role="tab" data-aba="${k}" class="${S.aba === k ? 'ativa' : ''}">${r}</button>`).join('')}
+    </div>${corpo}</div>`;
+}
+
+async function desenharJogo() {
+  const E = await api('/api/estado?p=' + S.p);
+  if (E.erro) { S.p = null; localStorage.removeItem('heroi'); return desenharLobby(); }
+  const m = E.mundo;
+  document.getElementById('relogio').innerHTML = `<span class="pilula ${m.periodo}">${m.periodo === 'noite' ? '☾ noite' : '☀ dia'}</span><span>Dia ${m.dia} · ${m.hora}</span>`;
+  const emCombate = E.batalha?.status === 'em_andamento';
+  if (!emCombate) S.ultimoLog = 0;
+  $app.innerHTML = `<div class="grade">
+    <div class="pilha">${desenharFicha(E.ficha)}</div>
+    <div class="centro">${emCombate ? desenharCombate(E) : desenharExploracao(E)}</div>
+    <div>${desenharLateral(E)}</div>
+  </div>`;
+
+  const log = document.getElementById('log'); if (log) log.scrollTop = log.scrollHeight;
+  document.getElementById('trocar').onclick = () => { S.p = null; localStorage.removeItem('heroi'); desenhar(); };
+  $app.querySelectorAll('[data-aba]').forEach((b) => b.onclick = () => { S.aba = b.dataset.aba; desenharJogo(); });
+  $app.querySelectorAll('[data-turno]').forEach((b) => b.onclick = () => agir('turno', { acao: b.dataset.turno, ref: b.dataset.ref }));
+  $app.querySelectorAll('[data-acao]').forEach((b) => b.onclick = () => {
+    const d = b.dataset;
+    agir(d.acao, { regiao: d.regiao, monstro: d.monstro, item: d.item, quest: d.quest, horas: d.horas, equipar: d.equipar !== 'false' });
+  });
+}
+
+const desenhar = () => (S.p ? desenharJogo() : desenharLobby());
+desenhar();
+</script>
+</body>
+</html>

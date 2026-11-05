@@ -1,0 +1,14 @@
+{
+  "name": "ecos-de-brumafria",
+  "version": "1.0.0",
+  "description": "RPG cuja lógica roda dentro do PostgreSQL (triggers, functions e procedures)",
+  "type": "module",
+  "scripts": {
+    "jogar": "node servidor.mjs",
+    "demo": "node rodar.mjs",
+    "console": "node rodar.mjs --console"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.2.17"
+  }
+}
