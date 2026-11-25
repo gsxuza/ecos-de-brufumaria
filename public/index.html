@@ -188,6 +188,8 @@ const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const pct = (a, b) => Math.max(0, Math.min(100, b ? (a / b) * 100 : 0));
 
 async function api(caminho, corpo) {
+  // Na demo do GitHub Pages o banco roda no próprio navegador (web/motor.mjs).
+  if (window.motorPronto) return (await window.motorPronto)(caminho, corpo);
   const r = await fetch(caminho, corpo ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) } : {});
   return r.json();
 }

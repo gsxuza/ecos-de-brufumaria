@@ -6,7 +6,8 @@
   "scripts": {
     "jogar": "node servidor.mjs",
     "demo": "node rodar.mjs",
-    "console": "node rodar.mjs --console"
+    "console": "node rodar.mjs --console",
+    "site": "node scripts/montar-site.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.2.17"

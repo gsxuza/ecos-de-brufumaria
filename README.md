@@ -4,6 +4,10 @@ RPG de turnos em que **toda a regra do jogo roda dentro do PostgreSQL**: as rola
 de dano, a IA dos monstros, a progressão de nível, o saque, as missões, o ciclo dia/noite, os segredos,
 as conquistas e a segurança. A aplicação cliente só faz `CALL` em procedures e lê `views`.
 
+**[▶ Jogar no navegador](https://gsxuza.github.io/ecos-de-brumafria/)**: o PostgreSQL inteiro roda na sua aba (PGlite, compilado para WebAssembly), sem servidor e sem instalar nada.
+
+![Uma batalha: cada ataque é uma procedure; o d20, o dano e a IA do monstro são calculados dentro do banco](imagens/batalha.gif)
+
 > *Brumafria é uma vila sob névoa eterna. O sino da torre está mudo há cem anos. Ele se partiu em três
 > pedaços, espalhados entre criaturas do bosque, das minas e do pântano. Quem reunir os três vai ouvir
 > o sino tocar e descobrir o que existe sob a torre.*
@@ -33,6 +37,10 @@ node rodar.mjs --console
 O primeiro comando recria o banco e roda a demonstração. O segundo abre um console SQL para jogar. A saída de uma
 execução completa está em `saida_demo.txt`.
 
+**Opção C: só o navegador.** Abra a [demo no GitHub Pages](https://gsxuza.github.io/ecos-de-brumafria/). Na primeira visita a página baixa o
+PGlite, roda os arquivos `sql/01` a `sql/07` dentro da aba e guarda o banco no IndexedDB do navegador, então os
+heróis continuam lá quando você volta. Para montar a mesma demo localmente: `npm run site` gera a pasta `_site/`.
+
 ### Interface gráfica
 ```bash
 node servidor.mjs
@@ -40,7 +48,11 @@ node servidor.mjs
 Depois, abra **http://localhost:3000** no navegador. Pela página dá para criar heróis, explorar, lutar turno a turno
 (com o d20 animado), usar a batalha automática, viajar, comprar e vender, equipar, aceitar missões e ler a crônica.
 
-A interface não contém regra de jogo. O `servidor.mjs` apenas:
+| Lobby | Batalha |
+|---|---|
+| ![Lobby com heróis, ranking e as classes jogáveis](imagens/lobby.png) | ![Batalha com o registro de combate e as rolagens de d20](imagens/batalha.png) |
+
+A interface não contém regra de jogo. A camada de acesso (`jogo.mjs`, usada pelo `servidor.mjs` e pela demo no navegador) apenas:
 - transforma cada clique em um `CALL sp_…`, executado com `SET ROLE rpg_jogador`, ou seja, o papel sem permissão de
   escrita nas tabelas. Isso prova na prática que as procedures `SECURITY DEFINER` são a única porta de entrada;
 - lê o estado do jogo pelas views (`vw_ficha`, `vw_quests` etc.);
@@ -81,6 +93,10 @@ SELECT * FROM vw_ficha;  SELECT * FROM vw_combate;  SELECT * FROM vw_quadro_de_m
 | `06_dados.sql` | O conteúdo do mundo: 8 classes, 15 habilidades, 5 regiões, 25 itens, 12 monstros, 7 missões, 1 segredo, 8 conquistas |
 | `07_seguranca.sql` | Papéis `rpg_jogador` e `rpg_mestre`, procedures `SECURITY DEFINER` |
 | `08_demo.sql` | Roteiro de apresentação em 13 etapas |
+| `jogo.mjs` | Camada de acesso sem regra de jogo: traduz ações em `CALL` e lê as views. Usada pelo servidor e pela demo |
+| `servidor.mjs` | Servidor HTTP local (Node + PGlite) para a interface em `public/index.html` |
+| `web/motor.mjs` | A mesma camada rodando no navegador, com o PGlite carregado da CDN e o banco no IndexedDB |
+| `scripts/montar-site.mjs` | Monta a demo estática em `_site/`; o workflow `pages.yml` publica no GitHub Pages a cada push na `main` |
 
 ### Modelo de entidades
 
